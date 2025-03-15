@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import ProductPopup from "../components/ProductPopup";
 
 const Home = () => {
   const [categories, setCategories] = useState([]);
   const [productsByCategory, setProductsByCategory] = useState({});
-  const [electronics, setElectronics] = useState([]); // Store Electronics category products
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   const banners = [
     "Banner 1 (Sale)",
@@ -28,11 +29,6 @@ const Home = () => {
           return acc;
         }, {});
         setProductsByCategory(groupedProducts);
-
-        // Extract only Electronics category
-        if (groupedProducts["Electronics"]) {
-          setElectronics(groupedProducts["Electronics"].slice(0, 12));
-        }
       })
       .catch(error => console.error("Failed to load products:", error));
   }, []);
@@ -47,7 +43,7 @@ const Home = () => {
 
   return (
     <div className="home-container">
-      {/* Sidebar + Carousel (Row Layout) */}
+      {/* Sidebar + Carousel */}
       <div className="sidebar-carousel-container">
         {/* Sidebar */}
         <aside className="sidebar">
@@ -61,6 +57,7 @@ const Home = () => {
           </ul>
         </aside>
 
+        {/* Carousel */}
         <div className="carousel-container">
           <h2>Sale</h2>
           <div className="carousel">
@@ -76,7 +73,7 @@ const Home = () => {
             <h2>Shop {category}</h2>
             <div className="product-grid">
               {productsByCategory[category].slice(0, 12).map((product) => (
-                <div key={product.id} className="product-card">
+                <div key={product.id} className="product-card" onClick={() => setSelectedProduct(product)}>
                   <div className="product-image">[Image Placeholder]</div>
                   <p className="product-name">{product.name}</p>
                   <p className="product-price">${product.price}</p>
@@ -90,18 +87,10 @@ const Home = () => {
         ))}
       </div>
 
-      {/* <div className="electronics-section">
-        <h2>Shop Electronics</h2>
-        <div className="product-grid">
-          {electronics.map((product) => (
-            <div key={product.id} className="product-card">
-              <div className="product-image">[Image Placeholder]</div>
-              <p className="product-name">{product.name}</p>
-              <p className="product-price">${product.price}</p>
-            </div>
-          ))}
-        </div>
-      </div> */}
+      {/* Product Popup */}
+      {selectedProduct && (
+        <ProductPopup product={selectedProduct} onClose={() => setSelectedProduct(null)} />
+      )}
     </div>
   );
 };

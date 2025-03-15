@@ -38,7 +38,7 @@ export const login = async (email, password) => {
 //Get user profile
 export const getUserProfile = async () => {
     const token = localStorage.getItem("token");
-    console.log("Token stored in localStorage:", token);  // Check if the token is stored
+    console.log("Token stored in localStorage:", token);
     if (!token) {
         console.error("No token found! User might not be logged in.");
         return null;
