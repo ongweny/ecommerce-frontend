@@ -416,3 +416,83 @@ label {
 .wishlist-item button:hover {
   background: #cc0000;
 }
+
+/* Grid layout for all products */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  padding: 20px;
+}
+
+.product-item {
+  border: 1px solid #ddd;
+  padding: 15px;
+  text-align: center;
+  background: #fff;
+  border-radius: 8px;
+}
+
+.product-item h3 {
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.product-item p {
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+/* Search Bar */
+.search-container {
+  width: 100%;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.search-container input {
+  width: 60%;
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.search-container input:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.image-upload {
+  border: 2px dashed #ccc;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  display: block;
+  margin: 10px 0;
+}
+
+.image-upload input {
+  display: none;
+}
+
+.image-upload span {
+  font-size: 14px;
+  color: #666;
+}
+
+.image-preview {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  margin-top: 10px;
+  border-radius: 5px;
+}
+
+.product-image {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  margin-top: 10px;
+  border-radius: 5px;
+}

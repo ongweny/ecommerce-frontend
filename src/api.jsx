@@ -2,18 +2,18 @@ import axios from "axios";
 
 const API_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8080";
 
-// Fetch all products
+// ✅ Fetch all products
 export const fetchProducts = async () => {
-    try {
-      const response = await axios.get(`${API_URL}/products`);
-      return response.data;
-    } catch (error) {
-      console.error("Error fetching products:", error);
-      throw error;
-    }
-  };  
+  try {
+    const response = await axios.get(`${API_URL}/products`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    throw error;
+  }
+};
 
-// Fetch products by ID
+// ✅ Fetch product by ID
 export const fetchProductById = async (id) => {
   try {
     const response = await axios.get(`${API_URL}/products/${id}`);
@@ -24,99 +24,123 @@ export const fetchProductById = async (id) => {
   }
 };
 
-//Handle user login 
-export const login = async (email, password) => {
-    try {
-      const response = await axios.post(`${API_URL}/auth/login`, { email, password });
-      return response.data;
-    } catch (error) {
-      console.error("Login error:", error);
-      throw error;
-    }
-  };  
-
-//Get user profile
-export const getUserProfile = async () => {
-    const token = localStorage.getItem("token");
-    console.log("Token stored in localStorage:", token);
-    if (!token) {
-        console.error("No token found! User might not be logged in.");
-        return null;
-    }
-
-    try {
-        const response = await axios.get(`${API_URL}/auth/me`, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        });
-        return response.data;
-    } catch (error) {
-        console.error("Error fetching user profile:", error.response?.data || error.message);
-        throw error;
-    }
-};
-
-
-// Add product
+// ✅ Add product (supports image upload)
 export const addProduct = async (productData) => {
-const token = localStorage.getItem("token");
-const response = await fetch("http://localhost:8080/products", {
-    method: "POST",
-    headers: {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(productData),
-});
+  console.log("🚀 Preparing product data:", productData);
 
-if (!response.ok) {
-    throw new Error("Failed to add product");
-}
+  const token = localStorage.getItem("token");
+  if (!token) throw new Error("Unauthorized: No token found");
 
-return response.json();
-};
+  const formData = new FormData();
+  if (productData.name) formData.append("name", productData.name);
+  if (productData.description) formData.append("description", productData.description);
+  if (productData.price) formData.append("price", productData.price);
+  if (productData.stock) formData.append("stock", productData.stock);
+  if (productData.category) formData.append("category", productData.category);
+  if (productData.tags) formData.append("tags", JSON.stringify(productData.tags));
+  if (productData.image) formData.append("image_url", productData.image); // ✅ Ensuring correct field name
 
-// Delete porduct
-export const deleteProduct = async (productId) => {
-    const token = localStorage.getItem("token");
-    const response = await fetch(`${API_URL}/products/${productId}`, {
-      method: "DELETE",
+  // ✅ Debugging: Log FormData content
+  console.log("📦 FormData contents:");
+  for (let [key, value] of formData.entries()) {
+    console.log(`📌 ${key}:`, value);
+  }
+
+  try {
+    const response = await axios.post(`${API_URL}/products`, formData, {
       headers: {
         Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data",
       },
     });
-  
-    if (!response.ok) {
-      throw new Error("Failed to delete product");
-    }
-  
-    return response.json();
-  };
-  
-  
-// Fetch products by category
-export const fetchProductsByCategory = async (category) => {
-    try {
-      const response = await axios.get(`${API_URL}/products/${category}`);
-      return response.data;
-    } catch (error) {
-      console.error(`Error fetching products in category ${category}:`, error);
-      throw error;
-    }
-  };
+    console.log("✅ Product added successfully:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("❌ Failed to add product:", error.response?.data || error.message);
+    throw error;
+  }
+};
 
-// Function to add an item to the cart (requires token)
-export const addToCart = async (token, productId, quantity) => {
+// ✅ Delete product
+export const deleteProduct = async (productId) => {
+  const token = localStorage.getItem("token");
+  if (!token) throw new Error("Unauthorized: No token found");
+
+  try {
+    const response = await axios.delete(`${API_URL}/products/${productId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Failed to delete product:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+// ✅ Fetch products by category
+export const fetchProductsByCategory = async (category) => {
+  try {
+    const response = await axios.get(`${API_URL}/products/category/${category}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching products in category ${category}:`, error);
+    throw error;
+  }
+};
+
+// ✅ Register user
+export const registerUser = async (userData) => {
+  try {
+    const response = await axios.post(`${API_URL}/auth/signup`, userData);
+    return response.data;
+  } catch (error) {
+    console.error("Signup error:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+// ✅ Login user
+export const login = async (email, password) => {
+  try {
+    const response = await axios.post(`${API_URL}/auth/login`, { email, password });
+    return response.data;
+  } catch (error) {
+    console.error("Login error:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+// ✅ Get user profile
+export const getUserProfile = async () => {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    console.error("No token found! User might not be logged in.");
+    return null;
+  }
+
+  try {
+    const response = await axios.get(`${API_URL}/auth/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    const userData = response.data;
+    return { ...userData, role: userData.is_admin ? "admin" : "user" };
+  } catch (error) {
+    console.error("Error fetching user profile:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+// ✅ Add to cart
+export const addToCart = async (productId, quantity) => {
+  const token = localStorage.getItem("token");
+  if (!token) throw new Error("Unauthorized: No token found");
+
   try {
     const response = await axios.post(
       `${API_URL}/cart/add`,
       { product_id: productId, quantity },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
+      { headers: { Authorization: `Bearer ${token}` } }
     );
     return response.data;
   } catch (error) {
@@ -125,13 +149,14 @@ export const addToCart = async (token, productId, quantity) => {
   }
 };
 
-// Function to view cart items (requires token)
-export const viewCart = async (token) => {
+// ✅ View cart
+export const viewCart = async () => {
+  const token = localStorage.getItem("token");
+  if (!token) throw new Error("Unauthorized: No token found");
+
   try {
-    const response = await axios.get(`${API_URL}/cart/`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+    const response = await axios.get(`${API_URL}/cart`, {
+      headers: { Authorization: `Bearer ${token}` },
     });
     return response.data;
   } catch (error) {
@@ -140,13 +165,14 @@ export const viewCart = async (token) => {
   }
 };
 
-// Function to remove an item from the cart 
-export const removeFromCart = async (token, productId) => {
+// ✅ Remove from cart
+export const removeFromCart = async (productId) => {
+  const token = localStorage.getItem("token");
+  if (!token) throw new Error("Unauthorized: No token found");
+
   try {
     const response = await axios.delete(`${API_URL}/cart/remove/${productId}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     });
     return response.data;
   } catch (error) {
@@ -155,13 +181,14 @@ export const removeFromCart = async (token, productId) => {
   }
 };
 
-// Function to checkout (requires token)
-export const checkout = async (token) => {
+// ✅ Checkout
+export const checkout = async () => {
+  const token = localStorage.getItem("token");
+  if (!token) throw new Error("Unauthorized: No token found");
+
   try {
     const response = await axios.post(`${API_URL}/cart/checkout`, {}, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     });
     return response.data;
   } catch (error) {
@@ -169,15 +196,3 @@ export const checkout = async (token) => {
     throw error;
   }
 };
-
-//Register User
-export const registerUser = async (userData) => {
-    try {
-      const response = await axios.post(`${API_URL}/auth/signup`, userData);
-      return response.data;
-    } catch (error) {
-      console.error("Signup error:", error);
-      throw error;
-    }
-  };
-  

@@ -8,7 +8,15 @@ const Account = () => {
   const [selectedSection, setSelectedSection] = useState("profile");
   const [products, setProducts] = useState([]);
   const [savedProducts, setSavedProducts] = useState([]);
+  const [searchTerm, setSearchTerm] = useState(""); // 🔍 Added search term
   const navigate = useNavigate();
+  const [image, setImage] = useState(null); // ✅ Store uploaded image
+  const [preview, setPreview] = useState(null); // ✅ Image preview
+  const [name, setName] = useState("");
+  const [price, setPrice] = useState("");
+  const [description, setDescription] = useState("");
+  const [category, setCategory] = useState(""); // Ensure category is stored
+
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -45,23 +53,42 @@ const Account = () => {
     }
   };
 
-  const handleAddProduct = async (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const newProduct = {
-      name: formData.get("name"),
-      price: formData.get("price"),
-      description: formData.get("description"),
-    };
-  
-    try {
-      await addProduct(newProduct);
-      loadProducts();
-      e.target.reset();
-    } catch (error) {
-      console.error("Error adding product:", error);
+  const handleImageUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setImage(file);
+      setPreview(URL.createObjectURL(file)); // ✅ Show preview
     }
   };
+
+  const handleAddProduct = async (e) => {
+    e.preventDefault();
+    
+    const formData = new FormData();
+    formData.append("name", name);  // Ensure these fields exist
+    formData.append("price", price);
+    formData.append("description", description);
+    formData.append("image", image); // imageFile should be the File object from input
+    
+    console.log("📦 FormData contents:", Object.fromEntries(formData.entries())); // Debugging
+  
+    try {
+      await addProduct(formData);
+      alert("Product added successfully!");
+  
+      // Reset form fields
+      setName("");
+      setPrice("");
+      setDescription("");
+      setCategory("");
+      setImage(null);
+      setPreview(null);
+    } catch (error) {
+      console.error("❌ Error adding product:", error);
+    }
+  };
+  
+  
 
   const handleDeleteProduct = async (productId) => {
     try {
@@ -77,6 +104,12 @@ const Account = () => {
     setSavedProducts(updatedSaved);
     localStorage.setItem("savedItems", JSON.stringify(updatedSaved));
   };
+
+  // 🔍 Filter products by search term (name or category)
+  const filteredProducts = products.filter((product) =>
+    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    product.category.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="account-container">
@@ -138,9 +171,44 @@ const Account = () => {
           <div>
             <h2>Add Product</h2>
             <form onSubmit={handleAddProduct}>
-              <input type="text" name="name" placeholder="Product Name" required />
-              <input type="number" name="price" placeholder="Price" required />
-              <textarea name="description" placeholder="Description" required></textarea>
+              <input 
+                  type="text" 
+                  placeholder="Product Name" 
+                  value={name} 
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                />
+
+                <input 
+                  type="number" 
+                  placeholder="Price" 
+                  value={price} 
+                  onChange={(e) => setPrice(e.target.value)}
+                  required
+                />
+
+                <input 
+                  type="text" 
+                  placeholder="Category" 
+                  value={category} 
+                  onChange={(e) => setCategory(e.target.value)}
+                  required
+                />
+
+                <textarea 
+                  placeholder="Description" 
+                  value={description} 
+                  onChange={(e) => setDescription(e.target.value)}
+                  required
+                ></textarea>
+
+
+              <label className="image-upload">
+                <input type="file" accept="image/*" onChange={handleImageUpload} />
+                <span>Drag and Drop or Click to Upload</span>
+              </label>
+              {preview && <img src={preview} alt="Preview" className="image-preview" />}
+
               <button type="submit">Add Product</button>
             </form>
           </div>
@@ -149,14 +217,32 @@ const Account = () => {
         {selectedSection === "viewProducts" && (
           <div>
             <h2>All Products</h2>
-            {products.map((product) => (
-              <div key={product.id} className="product-item">
-                <h3>{product.name}</h3>
-                <p>{product.description}</p>
-                <p>Price: ${product.price}</p>
-                <button onClick={() => handleDeleteProduct(product.id)}>Remove Product</button>
-              </div>
-            ))}
+            {/* 🔍 Search Bar */}
+            <div className="search-container">
+              <input
+                type="text"
+                placeholder="Search by name or category..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+
+            {/* 📌 Display Products in Grid Layout */}
+            <div className="product-grid">
+              {filteredProducts.length > 0 ? (
+                filteredProducts.map((product) => (
+                  <div key={product.id} className="product-item">
+                    <h3>{product.name}</h3>
+                    <p>{product.description}</p>
+                    <p>Category: {product.category}</p>
+                    <p>Price: ${product.price}</p>
+                    <button onClick={() => handleDeleteProduct(product.id)}>Remove Product</button>
+                  </div>
+                ))
+              ) : (
+                <p>No products found.</p>
+              )}
+            </div>
           </div>
         )}
       </div>
