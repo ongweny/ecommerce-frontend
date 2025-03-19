@@ -24,7 +24,7 @@ export const fetchProductById = async (id) => {
   }
 };
 
-// ✅ Add product (supports image upload)
+// ✅ Add product
 export const addProduct = async (productData) => {
   console.log("🚀 Preparing product data:", productData);
 
@@ -38,7 +38,7 @@ export const addProduct = async (productData) => {
   if (productData.stock) formData.append("stock", productData.stock);
   if (productData.category) formData.append("category", productData.category);
   if (productData.tags) formData.append("tags", JSON.stringify(productData.tags));
-  if (productData.image) formData.append("image_url", productData.image); // ✅ Ensuring correct field name
+  if (productData.image) formData.append("file", productData.image);
 
   // ✅ Debugging: Log FormData content
   console.log("📦 FormData contents:");

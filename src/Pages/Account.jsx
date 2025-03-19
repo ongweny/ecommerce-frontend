@@ -65,18 +65,17 @@ const Account = () => {
     e.preventDefault();
     
     const formData = new FormData();
-    formData.append("name", name);  // Ensure these fields exist
+    formData.append("name", name); 
     formData.append("price", price);
     formData.append("description", description);
-    formData.append("image", image); // imageFile should be the File object from input
+    formData.append("image", image);
     
-    console.log("📦 FormData contents:", Object.fromEntries(formData.entries())); // Debugging
+    console.log("📦 FormData contents:", Object.fromEntries(formData.entries()));
   
     try {
       await addProduct(formData);
       alert("Product added successfully!");
   
-      // Reset form fields
       setName("");
       setPrice("");
       setDescription("");
