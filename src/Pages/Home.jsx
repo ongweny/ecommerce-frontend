@@ -12,13 +12,11 @@ const Home = () => {
     "Banner 1 (Sale)",
     "Banner 2 (Special Offer)",
     "Banner 3 (Limited Time Deal)",
-  ]; // Placeholder text, replace with image URLs later
+  ]; 
 
   useEffect(() => {
-    // Fetch categories
-    setCategories(["Electronics", "Clothing", "Home", "Beauty", "Books", "Sports"]);
+    setCategories(["Electronics", "Clothing", "Home"]);
 
-    // Fetch products from backend
     axios.get("http://localhost:8080/products")
       .then(response => {
         const groupedProducts = response.data.reduce((acc, product) => {
@@ -33,7 +31,6 @@ const Home = () => {
       .catch(error => console.error("Failed to load products:", error));
   }, []);
 
-  // Auto-slide effect for the carousel
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % banners.length);
@@ -43,9 +40,7 @@ const Home = () => {
 
   return (
     <div className="home-container">
-      {/* Sidebar + Carousel */}
       <div className="sidebar-carousel-container">
-        {/* Sidebar */}
         <aside className="sidebar">
           <h2>Shop by Category</h2>
           <ul>
@@ -57,7 +52,6 @@ const Home = () => {
           </ul>
         </aside>
 
-        {/* Carousel */}
         <div className="carousel-container">
           <h2>Sale</h2>
           <div className="carousel">
@@ -66,7 +60,6 @@ const Home = () => {
         </div>
       </div>
 
-      {/* Product Listings */}
       <div className="product-sections">
         {Object.keys(productsByCategory).map((category, index) => (
           <div key={index} className="category-section">
@@ -74,7 +67,7 @@ const Home = () => {
             <div className="product-grid">
               {productsByCategory[category].slice(0, 12).map((product) => (
                 <div key={product.id} className="product-card" onClick={() => setSelectedProduct(product)}>
-                  <div className="product-image">[Image Placeholder]</div>
+                  <img src={product.image} alt={product.name} className="product-image" crossOrigin="anonymous"/>
                   <p className="product-name">{product.name}</p>
                   <p className="product-price">${product.price}</p>
                 </div>
@@ -87,7 +80,6 @@ const Home = () => {
         ))}
       </div>
 
-      {/* Product Popup */}
       {selectedProduct && (
         <ProductPopup product={selectedProduct} onClose={() => setSelectedProduct(null)} />
       )}

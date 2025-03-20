@@ -25,6 +25,7 @@ export const fetchProductById = async (id) => {
 };
 
 // ✅ Add product
+
 export const addProduct = async (productData) => {
   console.log("🚀 Preparing product data:", productData);
 
@@ -32,15 +33,25 @@ export const addProduct = async (productData) => {
   if (!token) throw new Error("Unauthorized: No token found");
 
   const formData = new FormData();
-  if (productData.name) formData.append("name", productData.name);
-  if (productData.description) formData.append("description", productData.description);
-  if (productData.price) formData.append("price", productData.price);
-  if (productData.stock) formData.append("stock", productData.stock);
-  if (productData.category) formData.append("category", productData.category);
-  if (productData.tags) formData.append("tags", JSON.stringify(productData.tags));
-  if (productData.image) formData.append("file", productData.image);
+  formData.append("name", productData.get("name"));
+  formData.append("price", parseFloat(productData.get("price"))); 
+  formData.append("stock", parseInt(productData.get("stock"), 10));
+  formData.append("description", productData.get("description"));
+  formData.append("category", productData.get("category"));
 
-  // ✅ Debugging: Log FormData content
+  const tags = productData.get("tags");
+  if (Array.isArray(tags)) {
+    formData.append("tags", JSON.stringify(tags));
+  } else if (typeof tags === "string") {
+    formData.append("tags", tags);
+  }
+  
+    if (productData.get("image") instanceof File) {
+    formData.append("image", productData.get("image"));
+  } else {
+    console.warn("⚠️ No valid image file selected.");
+  }
+
   console.log("📦 FormData contents:");
   for (let [key, value] of formData.entries()) {
     console.log(`📌 ${key}:`, value);
@@ -50,13 +61,11 @@ export const addProduct = async (productData) => {
     const response = await axios.post(`${API_URL}/products`, formData, {
       headers: {
         Authorization: `Bearer ${token}`,
-        "Content-Type": "multipart/form-data",
       },
     });
-    console.log("✅ Product added successfully:", response.data);
     return response.data;
   } catch (error) {
-    console.error("❌ Failed to add product:", error.response?.data || error.message);
+    console.error("❌ Failed to add product:", error);
     throw error;
   }
 };
